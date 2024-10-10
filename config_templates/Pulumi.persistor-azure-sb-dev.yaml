@@ -1,0 +1,78 @@
+config:
+
+  #################################### PRODUCT CONFIG #####################################
+
+  namespace: persistor
+  # component selection
+  deployPersistor: true
+
+  resourceTags:
+    team: dataphos
+    env: dev
+
+  # persistor chart config
+  dataphos-persistor:
+    persistor:
+      persistor:
+        broker: servicebus
+        topic: input-topic
+        consumerID: input-topic-sub
+        storage: azure-blob-storage
+        storageTargetID: dest-bucket
+        indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
+        replicas: 1
+
+    indexer:
+      indexer:
+        broker: servicebus
+        topic: indexer-topic
+        consumerID: indexer-topic-sub
+        replicas: 1 # Scale the service exposing the metadata
+        consumerReplicas: 1 # Scale the consumers reading and storing the metadata
+        storageSize: 1Gi
+
+    resubmitter:
+      resubmitter:
+        broker: servicebus
+        storage: azure-blob-storage
+        indexer: indexer
+
+
+  ################################# INFRASTRUCTURE CONFIG #################################
+
+  # provider config
+  azure-native:location: westeurope
+
+  # cluster config
+  cluster:
+    aks-cluster:
+      type: aks
+      name: aks-cluster
+      resourceGroup: persistor-rg
+
+
+  # broker config
+  brokers:
+    servicebus:
+      type: servicebus
+      resourceGroup: persistor-rg
+      azsbNamespace: dataphos-sb-ns
+
+      topics:
+        input-topic:
+          subscriptions:
+            input-topic-sub: {}
+        indexer-topic:
+          subscriptions:
+            indexer-topic-sub: {}
+
+
+  # storage config
+  storage:
+    azure-blob-storage:
+      type: abs
+      resourceGroup: persistor-rg
+      accountStorageID: dataphosstorageacc
+
+      buckets:
+        dest-bucket: {}

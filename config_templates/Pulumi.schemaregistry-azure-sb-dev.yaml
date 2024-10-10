@@ -1,0 +1,70 @@
+config:
+
+  #################################### PRODUCT CONFIG #####################################
+
+  namespace: schemaregistry
+  # component selection
+  deploySchemaRegistry: true
+  deploySchemaRegistryValidator: true
+
+  resourceTags:
+    team: dataphos
+    env: dev
+
+  # schema registry chart config
+  dataphos-schema-registry:
+    registryReplicas: 1
+
+    # History database.
+    database:
+      name: postgres
+      username: postgres
+      password: POSTGRES_PASSWORD
+
+  # schema registry validator chart config
+  dataphos-schema-registry-validator:
+    xmlValidator:
+      enable: true
+      replicas: 1
+
+    csvValidator:
+      enable: true
+      replicas: 1
+
+    validator:
+      validator:
+        broker: servicebus
+        destinationBroker: servicebus
+        topic: input-topic
+        consumerID: input-topic-sub
+        validTopic: valid-topic
+        deadletterTopic: deadletter-topic
+        replicas: 1
+
+
+  ################################# INFRASTRUCTURE CONFIG #################################
+
+  # provider config
+  azure-native:location: westeurope
+
+  # cluster config
+  cluster:
+    aks-cluster:
+      type: aks
+      name: aks-cluster
+      resourceGroup: schemaregistry-rg
+
+
+  # broker config
+  brokers:
+    servicebus:
+      type: servicebus
+      resourceGroup: schemaregistry-rg
+      azsbNamespace: dataphos-sb-ns
+
+      topics:
+        input-topic:
+          subscriptions:
+            input-topic-sub: {}
+        valid-topic: {}
+        deadletter-topic: {}
