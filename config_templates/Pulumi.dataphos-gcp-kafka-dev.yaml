@@ -1,0 +1,119 @@
+config:
+
+  #################################### PRODUCT CONFIG #####################################
+
+  namespace: dataphos
+  # component selection
+  deploySchemaRegistry: true
+  deploySchemaRegistryValidator: true
+  deployPersistor: true
+
+  resourceTags:
+    team: dataphos
+    env: dev
+
+  # schema registry chart config
+  dataphos-schema-registry:
+    registryReplicas: 1
+
+    # History database.
+    database:
+      name: postgres
+      username: postgres
+      password: POSTGRES_PASSWORD
+
+  # schema registry validator chart config
+  dataphos-schema-registry-validator:
+    xmlValidator:
+      enable: true
+      replicas: 1
+
+    csvValidator:
+      enable: true
+      replicas: 1
+
+    validator:
+      validator:
+        broker: strimzi-kafka
+        destinationBroker: strimzi-kafka
+        topic: input-topic
+        consumerID: input-topic-sub-scval
+        validTopic: valid-topic
+        deadletterTopic: deadletter-topic-scval
+        replicas: 1
+
+  # persistor chart config
+  dataphos-persistor:
+    persistor:
+      persistor:
+        broker: strimzi-kafka
+        topic: input-topic
+        consumerID: input-topic-sub-per
+        storage: google-cloud-storage
+        storageTargetID: dataphos-dest-bucket-dev
+        indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
+        deadletterTopic: deadletter-topic-per
+        replicas: 1
+
+    indexer:
+      indexer:
+        broker: strimzi-kafka
+        topic: indexer-topic
+        consumerID: indexer-topic-sub
+        deadletterTopic: deadletter-topic-idx
+        replicas: 1 # Scale the service exposing the metadata
+        consumerReplicas: 1 # Scale the consumers reading and storing the metadata
+        storageSize: 1Gi
+
+    resubmitter:
+      resubmitter:
+        broker: strimzi-kafka
+        storage: google-cloud-storage
+        indexer: indexer
+
+  ################################# INFRASTRUCTURE CONFIG #################################
+
+  # platform config
+  gcp:project: dataphos-project
+  gcp:region: europe-west2 # default region
+  gcp:zone: europe-west2-a # default zone
+
+  # cluster config
+  cluster:
+    gke-cluster:
+      type: gke
+      name: gke-cluster
+      projectID: dataphos-project
+      location: europe-west2-a # optional region or zone
+      initialNodeCount: 3
+
+
+  # broker config
+  brokers:
+    strimzi-kafka:
+      type: kafka
+      clusterNamespace: kafka-cluster
+      clusterName: kafka-cluster
+
+      topics:
+        input-topic:
+          subscriptions:
+            input-topic-sub-per: {}
+            input-topic-sub-scval: {}
+        valid-topic: {}
+        deadletter-topic-scval: {}
+        deadletter-topic-per: {}
+        indexer-topic:
+          subscriptions:
+            indexer-topic-sub: {}
+        deadletter-topic-idx: {}
+
+
+  # storage config
+  storage:
+    google-cloud-storage:
+      type: gcs
+      projectID: dataphos-project
+
+      buckets:
+        dataphos-dest-bucket-dev: {}

@@ -1,0 +1,13 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: $topicID
+  namespace: $clusterNamespace
+  labels:
+    strimzi.io/cluster: "$clusterName"
+  annotations:
+    pulumi.com/patchForce: "true"
+spec:
+  partitions: $partitions
+  replicas: $replicas
+  config:
