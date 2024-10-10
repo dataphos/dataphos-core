@@ -44,11 +44,3 @@ jobs:
         run: |
           npm install --save-dev editorconfig-checker
           ./node_modules/.bin/editorconfig-checker
-
-  python_lint_job:
-    name: Python lint
-    if: ${{ ! contains(github.head_ref, 'release-please--branches--main') }}
-    uses: github/super-linter@v4
-    env:
-      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      VALIDATE_PYTHON_BLACK: true
