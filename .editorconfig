@@ -20,6 +20,9 @@ end_of_line = lf
 [*.py]
 indent_size = 4
 
+[**/gke_config.py]
+indent_size = unset
+
 [*.md]
 indent_size = 2
 trim_trailing_whitespace = false

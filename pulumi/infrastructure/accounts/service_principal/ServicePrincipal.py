@@ -83,7 +83,7 @@ class ServicePrincipal(AbstractAccount):
     def _add_role_assignment(self, role_definition, scope, resource_name):
         role_name = role_definition["name"].replace(" ", "")
         role_id = role_definition["id"]
-        
+
         authorization.RoleAssignment(
             f"{self._app_id}-{resource_name}-{role_name}",
             principal_id=self._object_id,

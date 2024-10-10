@@ -10,16 +10,16 @@ cluster_properties = {
         "autoscalingProfile": "BALANCED", # [BALANCED, OPTIMIZE_UTILIZATION]
         "enabled": False,
         "resourceLimits": [
-          {
-            "resource_type": "cpu",
-            "minimum": 1,
-            "maximum": 1,
-          },
-          {
-            "resource_type": "memory",
-            "minimum": 1,
-            "maximum": 1,
-          }
+            {
+                "resource_type": "cpu",
+                "minimum": 1,
+                "maximum": 1,
+            },
+            {
+                "resource_type": "memory",
+                "minimum": 1,
+                "maximum": 1,
+            }
         ],
     }],
     "enableShieldedNodes": None,
