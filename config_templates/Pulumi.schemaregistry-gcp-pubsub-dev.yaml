@@ -69,5 +69,9 @@ config:
         input-topic:
           subscriptions:
             input-topic-sub: {}
-        valid-topic: {}
-        deadletter-topic: {}
+        valid-topic:
+          subscriptions:
+            valid-topic-sub: {}
+        deadletter-topic:
+          subscriptions:
+            deadletter-topic-sub: {}

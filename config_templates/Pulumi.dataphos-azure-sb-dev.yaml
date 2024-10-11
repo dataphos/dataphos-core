@@ -94,8 +94,12 @@ config:
           subscriptions:
             input-topic-sub-per: {}
             input-topic-sub-scval: {}
-        valid-topic: {}
-        deadletter-topic: {}
+        valid-topic:
+          subscriptions:
+            valid-topic-sub: {}
+        deadletter-topic:
+          subscriptions:
+            deadletter-topic-sub: {}
         indexer-topic:
           subscriptions:
             indexer-topic-sub: {}
