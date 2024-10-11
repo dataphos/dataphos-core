@@ -28,7 +28,7 @@ The Dataphos Helm charts are located in the [dataphos-helm repository](https://g
 
 To properly reference the charts during deployment, clone the dataphos-helm repository and copy its contents into the `helm_charts/` directory of the cloned dataphos-core repository.
 
-If you're planning on working with Kafka topics, clone the [strimzi-kafka-operator repository](https://github.com/strimzi/strimzi-kafka-operator/tree/main) and copy the contents of its `helm_charts/` directory to the same directory in the cloned dataphos-core repository.
+If you're planning on working with Kafka topics, clone the [strimzi-kafka-operator repository](https://github.com/strimzi/strimzi-kafka-operator/tree/main) and copy the contents of its `helm-charts/` directory to the same directory in the cloned dataphos-core repository.
 
 The contents of the `helm_charts/` directory should look like this:
 
