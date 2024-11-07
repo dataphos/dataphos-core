@@ -2,7 +2,7 @@ config:
 
   #################################### PRODUCT CONFIG #####################################
 
-  namespace: <participat_identification>-dataphos
+  namespace: <participant_identification>-dataphos
   # component selection
   deploySchemaRegistry: true
   deploySchemaRegistryValidator: true
@@ -39,9 +39,9 @@ config:
         broker: servicebus
         destinationBroker: servicebus
         topic: input-topic
-        consumerID: <participat_identification>-val-sub
-        validTopic: <participat_identification>-valid-topic
-        deadletterTopic: <participat_identification>-deadletter-topic
+        consumerID: <participant_identification>-val-sub
+        validTopic: <participant_identification>-valid-topic
+        deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
 
   # persistor chart config
@@ -49,17 +49,17 @@ config:
     persistor:
       persistor:
         broker: servicebus
-        topic: <participat_identification>-valid-topic
+        topic: <participant_identification>-valid-topic
         consumerID: persistor-sub
         storage: azure-blob-storage
-        storageTargetID: <participat_identification>-data-lake
+        storageTargetID: <participant_identification>-data-lake
         indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
         replicas: 1
 
     indexer:
       indexer:
         broker: servicebus
-        topic: <participat_identification>-indexer-topic
+        topic: <participant_identification>-indexer-topic
         consumerID: indexer-sub
         replicas: 1 # Scale the service exposing the metadata
         consumerReplicas: 1 # Scale the consumers reading and storing the metadata
@@ -96,15 +96,15 @@ config:
         input-topic:
           retain: true
           subscriptions:
-            <participat_identification>-val-sub:
+            <participant_identification>-val-sub:
               retain: true
-        <participat_identification>-valid-topic:
+        <participant_identification>-valid-topic:
           subscriptions:
             persistor-sub: {}
-        <participat_identification>-deadletter-topic:
+        <participant_identification>-deadletter-topic:
           subscriptions:
             deadletter-topic-sub: {}
-        <participat_identification>-indexer-topic:
+        <participant_identification>-indexer-topic:
           subscriptions:
             indexer-sub: {}
 
@@ -118,4 +118,4 @@ config:
       retain: true
 
       buckets:
-        <participat_identification>-data-lake: {}
+        <participant_identification>-data-lake: {}
