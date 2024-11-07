@@ -91,13 +91,13 @@ config:
       type: servicebus
       resourceGroup: dataphos-workshops
       azsbNamespace: dataphos-sb-ns
+      retain: true
 
       topics:
         input-topic:
           retain: true
           subscriptions:
-            <participant_identification>-val-sub:
-              retain: true
+            <participant_identification>-val-sub: {}
         <participant_identification>-valid-topic:
           subscriptions:
             persistor-sub: {}
@@ -107,7 +107,9 @@ config:
         <participant_identification>-indexer-topic:
           subscriptions:
             indexer-sub: {}
-
+        <participant_identification>-resubmitter-topic:
+          subscriptions:
+            resubmitter-sub: {}
 
   # storage config
   storage:
