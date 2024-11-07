@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dataphos-schema-registry
+description: A Helm chart for the Dataphos Schema Registry component
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

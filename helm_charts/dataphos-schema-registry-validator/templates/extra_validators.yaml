@@ -1,0 +1,81 @@
+{{- $namespace := .Values.namespace | default "dataphos" -}}
+{{- $csvValidator := ((.Values.images).csvValidator) | default "syntioinc/dataphos-schema-registry-csv-val:1.0.0" -}}
+{{- $xmlValidator := ((.Values.images).xmlValidator) | default "syntioinc/dataphos-schema-registry-xml-val:1.0.0" -}}
+# CSV Validator
+{{- if ((.Values.csvValidator).enable) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: validator-csv-svc
+  namespace: {{ $namespace }}
+  labels:
+    app: validator-csv
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: validator-csv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validator-csv
+  namespace: {{ $namespace }}
+  annotations:
+    "syntio.net/logme": "true"
+spec:
+  replicas: {{ ((.Values.csvValidator).replicas) | default 1 }}
+  selector:
+    matchLabels:
+      app: validator-csv
+  template:
+    metadata:
+      labels:
+        app: validator-csv
+    spec:
+      containers:
+        - name: validator-csv
+          image: {{ $csvValidator }}
+---
+{{- end}}
+
+# XML Validator
+{{- if ((.Values.xmlValidator).enable) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: validator-xml-svc
+  namespace: {{ $namespace }}
+  labels:
+    app: validator-xml
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8081
+  selector:
+    app: validator-xml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validator-xml
+  namespace: {{ $namespace }}
+  annotations:
+    "syntio.net/logme": "true"
+spec:
+  replicas: {{ ((.Values.xmlValidator).replicas) | default 1 }}
+  selector:
+    matchLabels:
+      app: validator-xml
+  template:
+    metadata:
+      labels:
+        app: validator-xml
+    spec:
+      containers:
+        - name: validator-xml
+          image: {{ $xmlValidator }}
+{{- end}}

@@ -1,0 +1,98 @@
+{{- range $rsb, $target := .Values.resubmitter }}
+{{- $rsb := kebabcase $rsb -}}
+{{- $broker := get $.Values.brokers $target.broker -}}
+{{- $storage := get $.Values.storage $target.storage -}}
+{{- $indexer := (get ($.Values.indexer | default dict) $target.indexer | default dict) -}}
+{{- $isGcp := or (eq $broker.type "pubsub") (eq $storage.type "gcs") -}}
+{{- $isAzure := or (eq $broker.type "servicebus") (eq $storage.type "abs") -}}
+{{- $namespace := $.Values.namespace | default "dataphos" -}}
+{{- $resubmitter := (($.Values.images).resubmitter) | default "syntioinc/dataphos-persistor-resubmitter:1.0.0" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: per-rsb-{{ $rsb }}-config
+  namespace: {{ $namespace }}
+data:
+  INDEXER_URL: "http://per-idx-api-{{ $target.indexer }}-svc.{{ $namespace }}.svc.cluster.local:8080"
+  {{- if $isGcp }}
+  PUBSUB_PROJECT_ID: {{ $storage.projectID | default $broker.projectID }}
+  {{- else if $isAzure }}
+  AZURE_CLIENT_ID: {{ $target.clientID }}
+  AZURE_CLIENT_SECRET: {{ $target.clientSecret }}
+  AZURE_TENANT_ID: {{ $target.tenantID }}
+  {{- end}}
+
+  PUBLISHER_TYPE: {{ $broker.type }}
+  {{- if eq $broker.type "kafka" }}
+  KAFKA_BROKERS: {{ $broker.brokerAddr }}
+  {{- else if eq $broker.type "servicebus" }}
+  SB_CONNECTION_STRING: {{ $broker.connectionString }}
+  {{- end}}
+
+  STORAGE_TYPE: {{ $storage.type }}
+  {{- if eq $storage.type "abs" }}
+  AZURE_STORAGE_ACCOUNT_NAME: {{ $storage.accountStorageID }}
+  {{- end}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: per-rsb-{{ $rsb }}-svc
+  namespace: {{ $namespace }}
+  labels:
+    app: per-rsb-{{ $rsb }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8081
+  selector:
+    app: per-rsb-{{ $rsb }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: per-rsb-{{ $rsb }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: per-rsb-{{ $rsb }}
+  template:
+    metadata:
+      labels:
+        app: per-rsb-{{ $rsb }}
+    spec:
+      containers:
+        - name: resubmitter
+          image: {{ $resubmitter }}
+          envFrom:
+            - configMapRef:
+                name: per-rsb-{{ $rsb }}-config
+          {{- if $isGcp }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/var/secrets/google/key.json"
+          volumeMounts:
+            - mountPath: "/var/secrets/google"
+              name: google-cloud-key
+          {{- end }}
+      {{- if $isGcp }}
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: {{ $target.serviceAccountSecret }}
+      {{- end }}
+---
+{{- if $target.serviceAccountKey }}
+apiVersion: v1
+kind: Secret
+data:
+  key.json: {{ $target.serviceAccountKey }}
+metadata:
+  name: {{ $target.serviceAccountSecret }}
+  namespace: {{ $namespace }}
+type: Opaque
+{{- end }}
+---
+{{ end }}

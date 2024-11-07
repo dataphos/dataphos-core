@@ -1,0 +1,132 @@
+{{- range $per, $target := .Values.persistor }}
+{{- $per := kebabcase $per -}}
+{{- $broker := get $.Values.brokers $target.broker -}}
+{{- $storage := get $.Values.storage $target.storage -}}
+{{- $indexer := get ($.Values.indexer | default dict) ($target.indexer | default "") | default dict -}}
+{{- $senderBroker := get $.Values.brokers ($indexer.broker | default "") | default (get $.Values.brokers ($target.deadletterBroker | default "")) | default dict -}}
+{{- $senderBrokerType := ($senderBroker.type | default "") }}
+{{- $isGcp := or (or (eq $broker.type "pubsub") (eq  $storage.type "gcs" )) (eq $senderBrokerType "pubsub") -}}
+{{- $enableIndexer := $target.indexer -}}
+{{- $enableDeadletter := $target.deadletterTopic -}}
+{{- $namespace := $.Values.namespace | default "dataphos" -}}
+{{- $persistor := (($.Values.images).persistor) | default "syntioinc/dataphos-persistor-core:1.0.0" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: per-{{ $per }}-config
+  namespace: {{ $namespace }}
+data:
+  # Reader configuration.
+  READER_TYPE: {{ $broker.type }}
+  {{- if eq $broker.type "pubsub" }}
+  READER_PUBSUB_PROJECTID: {{ $broker.projectID }}
+  READER_PUBSUB_SUBID: {{ $target.consumerID }}
+  {{- else if eq $broker.type "servicebus" }}
+  READER_SERVICEBUS_CONNECTIONSTRING: {{ $broker.connectionString }}
+  READER_SERVICEBUS_TOPICID: {{ $target.topic }}
+  READER_SERVICEBUS_SUBID: {{ $target.consumerID }}
+  {{- else if eq $broker.type "kafka" }}
+  READER_KAFKA_TOPICID: {{ $target.topic }}
+  READER_KAFKA_ADDRESS: {{ $broker.brokerAddr }}
+  READER_KAFKA_GROUPID: {{ $target.consumerID }}
+  {{- end }}
+
+  # Sender configuration.
+  {{- if or $enableIndexer $enableDeadletter }}
+  SENDER_TYPE: {{ $senderBroker.type }}
+  {{- if eq $senderBrokerType "pubsub" }}
+  SENDER_PUBSUB_PROJECTID: {{ $senderBroker.projectID }}
+  {{- else if eq $senderBrokerType "servicebus" }}
+  SENDER_SERVICEBUS_CONNECTIONSTRING: {{ $senderBroker.connectionString }}
+  {{- else if eq $senderBrokerType "kafka" }}
+  SENDER_KAFKA_ADDRESS: {{ $senderBroker.brokerAddr }}
+  {{- end }}
+
+  {{- if $enableIndexer }}
+  INDEXERENABLED: "true"
+  SENDER_TOPICID: {{ $indexer.topic }}
+  {{- else }}
+  INDEXERENABLED: "false"
+  {{- end }}
+
+  {{- if $enableDeadletter }}
+  DEADLETTERENABLED: "true"
+  SENDER_DEADLETTERTOPIC: {{ $target.deadletterTopic }}
+  {{- else }}
+  DEADLETTERENABLED: "false"
+  {{- end }}
+
+  {{- else }}
+  INDEXERENABLED: "false"
+  DEADLETTERENABLED: "false"
+  {{- end }}
+
+  # Storage configuration.
+  STORAGE_TYPE: {{ $storage.type }}
+  STORAGE_DESTINATION: {{ $target.storageTargetID }}
+  STORAGE_TOPICID: {{ $target.topic }}
+  STORAGE_PREFIX: {{ $target.storagePrefix | default "msg" }}
+  STORAGE_MSGEXTENSION: "avro"
+  STORAGE_MASK: {{ $target.storageMask | default "year/month/day/hour" | quote }}
+  STORAGE_CUSTOMVALUES: {{ $target.storageCustomValues | default "" }}
+  {{- if eq $storage.type "abs" }}
+  STORAGE_STORAGEACCOUNTID: {{ $storage.accountStorageID }}
+  AZURE_CLIENT_ID: {{ $target.clientID }}
+  AZURE_CLIENT_SECRET: {{ $target.clientSecret }}
+  AZURE_TENANT_ID: {{ $target.tenantID }}
+  {{- end }}
+
+  # Batch settings.
+  BATCHSETTINGS_BATCHSIZE: {{ $target.batchSize | default 5000 | quote }}
+  BATCHSETTINGS_BATCHMEMORY: {{ $target.batchMemory | default 1000000 | quote }}
+  BATCHSETTINGS_BATCHTIMEOUT: {{ $target.batchTimeout | default "30s" }}
+
+  MINIMUM_LOG_LEVEL: "INFO"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: per-{{ $per }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ $target.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: per-{{ $per }}
+  template:
+    metadata:
+      labels:
+        app: per-{{ $per }}
+    spec:
+      containers:
+        - name: persistor
+          image: {{ $persistor }}
+          envFrom:
+            - configMapRef:
+                name: per-{{ $per }}-config
+          {{- if $isGcp }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/var/secrets/google/key.json"
+          volumeMounts:
+            - mountPath: "/var/secrets/google"
+              name: google-cloud-key
+          {{- end }}
+      {{- if $isGcp }}
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: {{ $target.serviceAccountSecret }}
+      {{- end }}
+---
+{{- if $target.serviceAccountKey }}
+apiVersion: v1
+kind: Secret
+data:
+  key.json: {{ $target.serviceAccountKey }}
+metadata:
+  name: {{ $target.serviceAccountSecret }}
+  namespace: {{ $namespace }}
+type: Opaque
+{{- end }}
+{{ end }}

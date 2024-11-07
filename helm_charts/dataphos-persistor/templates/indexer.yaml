@@ -1,0 +1,207 @@
+{{- range $idx, $target := .Values.indexer }}
+{{- $idx := kebabcase $idx -}}
+{{- $indexerBroker := get $.Values.brokers $target.broker -}}
+{{- $enableDeadletter := $target.deadletterTopic -}}
+{{- $mongoConnectionString := $target.mongoConnectionString | default (printf "mongodb://per-idx-mongo-%s-0.per-idx-mongo-%s-svc.%s:27017" $idx $idx $.Values.namespace) -}}
+{{- $isGcp := eq $indexerBroker.type "pubsub" -}}
+{{- $namespace := $.Values.namespace | default "dataphos" -}}
+{{- $indexerMongoDb := (($.Values.images).indexerMongoDb) | default "mongo:4.0" -}}
+{{- $indexerApi := (($.Values.images).indexerApi) | default "syntioinc/dataphos-persistor-indexer-api:1.0.0" -}}
+{{- $indexer := (($.Values.images).indexer) | default "syntioinc/dataphos-persistor-indexer:1.0.0" -}}
+{{- if not $target.mongoConnectionString }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: per-idx-mongo-{{ $idx }}
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    matchLabels:
+      role: per-idx-mongo-{{ $idx }}
+  serviceName: per-idx-mongo-{{ $idx }}-svc
+  template:
+    metadata:
+      labels:
+        role: per-idx-mongo-{{ $idx }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: {{ $indexerMongoDb }}
+          command:
+            - mongod
+            - "--bind_ip"
+            - 0.0.0.0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-pv
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-pv
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ $target.storageSize }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: per-idx-mongo-{{ $idx }}-svc
+  namespace: {{ $namespace }}
+  labels:
+    name: per-idx-mongo-{{ $idx }}
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  clusterIP: None
+  selector:
+    role: per-idx-mongo-{{ $idx }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: per-idx-api-{{ $idx }}-svc
+  namespace: {{ $namespace }}
+  labels:
+    app: per-idx-api-{{ $idx }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+  selector:
+    app: per-idx-api-{{ $idx }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: per-idx-api-{{ $idx }}-config
+  namespace: {{ $namespace }}
+data:
+  CONN: {{ $mongoConnectionString }}
+  DATABASE: "indexer_db"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: per-idx-api-{{ $idx }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ $target.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: per-idx-api-{{ $idx }}
+  template:
+    metadata:
+      labels:
+        app: per-idx-api-{{ $idx }}
+    spec:
+      containers:
+        - name: indexer-api-{{ $idx }}
+          image: {{ $indexerApi }}
+          envFrom:
+            - configMapRef:
+                name: per-idx-api-{{ $idx }}-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: per-idx-{{ $idx }}-config
+  namespace: {{ $namespace }}
+data:
+    # Reader configuration.
+    READER_TYPE: {{ $indexerBroker.type }}
+    {{- if eq $indexerBroker.type "pubsub" }}
+    READER_PUBSUB_PROJECTID: {{ $indexerBroker.projectID }}
+    READER_PUBSUB_SUBID: {{ $target.consumerID }}
+    {{- else if eq $indexerBroker.type "servicebus" }}
+    READER_SERVICEBUS_CONNECTIONSTRING: {{ $indexerBroker.connectionString }}
+    READER_SERVICEBUS_TOPICID: {{ $target.topic }}
+    READER_SERVICEBUS_SUBID: {{ $target.consumerID }}
+    {{- else if eq $indexerBroker.type "kafka" }}
+    READER_KAFKA_TOPICID: {{ $target.topic }}
+    READER_KAFKA_ADDRESS: {{ $indexerBroker.brokerAddr }}
+    READER_KAFKA_GROUPID: {{ $target.consumerID }}
+    {{- end}}
+
+    # Sender configuration.
+    {{- if $enableDeadletter }}
+    DEADLETTERENABLED: "true"
+    SENDER_DEADLETTERTOPIC: {{ $target.deadletterTopic }}
+    SENDER_TYPE: {{ $indexerBroker.type }}
+    {{- if eq $indexerBroker.type "pubsub" }}
+    SENDER_PUBSUB_PROJECTID: {{ $indexerBroker.projectID }}
+    {{- else if eq $indexerBroker.type "servicebus" }}
+    SENDER_SERVICEBUS_CONNECTIONSTRING: {{ $indexerBroker.connectionString }}
+    {{- else if eq $indexerBroker.type "kafka" }}
+    SENDER_KAFKA_ADDRESS: {{ $indexerBroker.brokerAddr }}
+    {{- end }}
+    {{- else }}
+    DEADLETTERENABLED: "false"
+    {{- end }}
+
+    # Mongo settings.
+    MONGO_CONNECTIONSTRING: {{ $mongoConnectionString }}
+    MONGO_DATABASE: "indexer_db"
+    MONGO_COLLECTION: "indexer_collection"
+
+    # Batch settings.
+    BATCHSETTINGS_BATCHSIZE: {{ $target.batchSize | default 5000 | quote }}
+    BATCHSETTINGS_BATCHMEMORY: {{ $target.batchMemory | default 1000000 | quote }}
+    BATCHSETTINGS_BATCHTIMEOUT: {{ $target.batchTimeout | default "30s" }}
+
+    MINIMUM_LOG_LEVEL: "INFO"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: per-idx-{{ $idx }}
+  namespace: {{ $namespace }}
+spec:
+  replicas: {{ $target.consumerReplicas | default 1 }}
+  selector:
+    matchLabels:
+      app: per-idx-{{ $idx }}
+  template:
+    metadata:
+      labels:
+        app: per-idx-{{ $idx }}
+    spec:
+      containers:
+        - name: indexer
+          image: {{ $indexer }}
+          envFrom:
+            - configMapRef:
+                name: per-idx-{{ $idx }}-config
+          {{- if $isGcp }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/var/secrets/google/key.json"
+          volumeMounts:
+            - mountPath: "/var/secrets/google"
+              name: google-cloud-key
+          {{- end }}
+      {{- if $isGcp }}
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: {{ $target.serviceAccountSecret }}
+      {{- end}}
+---
+{{- if $target.serviceAccountKey }}
+apiVersion: v1
+kind: Secret
+data:
+  key.json: {{ $target.serviceAccountKey }}
+metadata:
+  name: {{ $target.serviceAccountSecret }}
+  namespace: {{ $namespace }}
+type: Opaque
+{{- end }}
+{{ end }}

@@ -167,7 +167,3 @@ cython_debug/
 
 # Stack configurations for development and testing
 /Pulumi.*.yaml
-/pulumi/Pulumi.*.yaml
-
-# Helm Charts
-/helm_charts/*

@@ -1,0 +1,105 @@
+{{- range $id, $target := .Values.validator }}
+{{- $id := kebabcase $id -}}
+{{- $sourceBroker := get $.Values.brokers $target.broker -}}
+{{- $destBroker := get $.Values.brokers $target.destinationBroker -}}
+{{- $isGcp := or (eq $sourceBroker.type "pubsub") (eq  $destBroker.type "pubsub") -}}
+{{- $namespace := $.Values.namespace | default "dataphos" -}}
+{{- $validator := (($.Values.images).validator) | default "syntioinc/dataphos-schema-registry-validator:1.0.0" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scval-{{ $id }}-config
+  namespace: {{ $namespace }}
+data:
+
+  # General settings.
+  REGISTRY_URL: {{ $.Values.schemaRegistryURL | default "http://schema-registry-svc:8080" }}
+  VALIDATORS_ENABLE_JSON: "true"
+  VALIDATORS_ENABLE_AVRO: "true"
+  VALIDATORS_ENABLE_PROTOBUF: "true"
+  VALIDATORS_ENABLE_CSV: {{ (($.Values.csvValidator).enable) | default "true" | quote }}
+  VALIDATORS_CSV_URL: "http://csv-validator-svc:8080"
+  VALIDATORS_ENABLE_XML: {{ (($.Values.xmlValidator).enable) | default "true" | quote }}
+  VALIDATORS_XML_URL: "http://xml-validator-svc:8080"
+
+  # Consumer settings.
+  CONSUMER_TYPE: {{ $sourceBroker.type }}
+  {{- if eq $sourceBroker.type "pubsub" }}
+  CONSUMER_PUBSUB_PROJECT_ID: {{ $sourceBroker.projectID }}
+  CONSUMER_PUBSUB_SUBSCRIPTION_ID: {{ $target.consumerID }}
+  {{- else if eq $sourceBroker.type "kafka" }}
+  CONSUMER_KAFKA_ADDRESS: {{ $sourceBroker.brokerAddr }}
+  CONSUMER_KAFKA_TOPIC: {{ $target.topic }}
+  CONSUMER_KAFKA_GROUP_ID: {{ $target.consumerID }}
+  {{- else if eq $sourceBroker.type "servicebus" }}
+  CONSUMER_SERVICEBUS_CONNECTION_STRING: {{ $sourceBroker.connectionString }}
+  CONSUMER_SERVICEBUS_TOPIC: {{ $target.topic }}
+  CONSUMER_SERVICEBUS_SUBSCRIPTION: {{ $target.consumerID }}
+  {{- end }}
+
+  # Producer settings.
+  PRODUCER_TYPE: {{ $destBroker.type }}
+  {{- if eq $destBroker.type "pubsub" }}
+  PRODUCER_PUBSUB_PROJECT_ID: {{ $destBroker.projectID }}
+  {{- else if eq $destBroker.type "kafka" }}
+  PRODUCER_KAFKA_ADDRESS: {{ $destBroker.brokerAddr }}
+  {{- else if eq $destBroker.type "servicebus" }}
+  PRODUCER_SERVICEBUS_CONNECTION_STRING: {{ $destBroker.connectionString }}
+  {{- end }}
+  TOPICS_VALID: {{ $target.validTopic }}
+  TOPICS_DEAD_LETTER: {{ $target.deadletterTopic }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scval-{{ $id }}
+  namespace: {{ $namespace }}
+  annotations:
+    "syntio.net/logme": "true"
+spec:
+  replicas: {{ $target.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: scval-{{ $id }}
+  template:
+    metadata:
+      labels:
+        app: scval-{{ $id }}
+    spec:
+      initContainers:
+        - name: check-components-health
+          image: subfuzion/netcat
+          command: ["sh", "-c", "sleep 60s;"]
+      containers:
+        - name: validator
+          image: {{ $validator }}
+          envFrom:
+            - configMapRef:
+                name: scval-{{ $id }}-config
+          {{- if $isGcp }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/var/secrets/google/key.json"
+          volumeMounts:
+            - mountPath: "/var/secrets/google"
+              name: google-cloud-key
+          {{- end }}
+      {{- if $isGcp }}
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: {{ $target.serviceAccountSecret }}
+      {{- end}}
+---
+{{- if $target.serviceAccountKey }}
+apiVersion: v1
+kind: Secret
+data:
+  key.json: {{ $target.serviceAccountKey }}
+metadata:
+  name: {{ $target.serviceAccountSecret }}
+  namespace: {{ $namespace }}
+type: Opaque
+{{- end }}
+---
+{{ end }}
