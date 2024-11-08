@@ -15,11 +15,11 @@ data:
   # General settings.
   REGISTRY_URL: {{ $.Values.schemaRegistryURL | default "http://schema-registry-svc:8080" }}
   VALIDATORS_ENABLE_JSON: "true"
-  VALIDATORS_ENABLE_AVRO: "true"
-  VALIDATORS_ENABLE_PROTOBUF: "true"
-  VALIDATORS_ENABLE_CSV: {{ (($.Values.csvValidator).enable) | default "true" | quote }}
+  VALIDATORS_ENABLE_AVRO: "false"
+  VALIDATORS_ENABLE_PROTOBUF: "false"
+  VALIDATORS_ENABLE_CSV: "false"
   VALIDATORS_CSV_URL: "http://csv-validator-svc:8080"
-  VALIDATORS_ENABLE_XML: {{ (($.Values.xmlValidator).enable) | default "true" | quote }}
+  VALIDATORS_ENABLE_XML: "false"
   VALIDATORS_XML_URL: "http://xml-validator-svc:8080"
 
   # Consumer settings.

@@ -27,12 +27,10 @@ config:
   # schema registry validator chart config
   dataphos-schema-registry-validator:
     xmlValidator:
-      enable: true
-      replicas: 1
+      enable: false
 
     csvValidator:
-      enable: true
-      replicas: 1
+      enable: false
 
     validator:
       validator:
