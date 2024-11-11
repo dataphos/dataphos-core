@@ -42,16 +42,8 @@ config:
         deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
 
-  # personalized validator
-  <participant_identification>-schema-registry-validator:
-    xmlValidator:
-      enable: false
-
-    csvValidator:
-      enable: false
-
-    validator:
-      validator:
+    # personalized validator
+      <participant_identification>-validator:
         broker: servicebus
         destinationBroker: servicebus
         topic: <participant_identification>-input-topic
