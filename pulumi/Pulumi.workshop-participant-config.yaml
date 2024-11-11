@@ -71,6 +71,8 @@ config:
         storageTargetID: <participant_identification>-data-lake
         indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
         replicas: 1
+        storageCustomValues: "customValue1:<participant_identification>"
+        storageMask: "customValue1/{schemaId}/{versionId}/year/month/day/hour"
 
     indexer:
       indexer:
