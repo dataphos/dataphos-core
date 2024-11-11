@@ -42,12 +42,14 @@ To overcome this, enable long path support by editing the Windows registry:
 
 ### Configure Cloud Credentials
 
-Authorize access to the cloud where you will deploy the infrastructure using the CLI.
-
-#### Azure
-
-Log in to the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and Pulumi will automatically use your credentials:
+Authorize access to the cloud where you will deploy the infrastructure using the CLI. Log in to the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and Pulumi will automatically use your credentials:
 
 ```
 az login
+```
+
+Please select the correct Azure Subscription for the Workshop with the following command:
+
+```
+az account set --subscription a8330230-b8a0-4839-8650-17faf7ddcc42
 ```
