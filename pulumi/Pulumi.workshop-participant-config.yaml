@@ -42,6 +42,24 @@ config:
         deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
 
+  # personalized validator
+  <participant_identification>-schema-registry-validator:
+    xmlValidator:
+      enable: false
+
+    csvValidator:
+      enable: false
+
+    validator:
+      validator:
+        broker: servicebus
+        destinationBroker: servicebus
+        topic: <participant_identification>-input-topic
+        consumerID: <participant_identification>-val-sub
+        validTopic: <participant_identification>-valid-topic
+        deadletterTopic: <participant_identification>-deadletter-topic
+        replicas: 1
+
   # persistor chart config
   dataphos-persistor:
     persistor:
@@ -93,6 +111,10 @@ config:
 
       topics:
         input-topic:
+          retain: true
+          subscriptions:
+            <participant_identification>-val-sub: {}
+        <participant_identification>-input-topic:
           retain: true
           subscriptions:
             <participant_identification>-val-sub: {}
