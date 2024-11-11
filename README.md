@@ -8,7 +8,7 @@
    - on Mac, run: `brew install pulumi/tap/pulumi`
    - on Linux, run: `curl -fsSL https://get.pulumi.com | sh`
 1. You need to log in to Pulumi in the CLI using the `pulumi login` command (create an account if you don't have one)
-1. You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription
+1. You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription. If you don't have access, please create a post in the [Security and Infrastructure](https://teams.microsoft.com/l/channel/19%3A5c191b040ad54297a9e6caa16f918810%40thread.skype/Security%20and%20Infrastructure?groupId=60ba0e91-26c9-47ae-81e9-974956868bbf&tenantId=e27500de-8438-45fb-8228-8bf0cc45248b) channel
 
 ## 👩‍💻 Workshop Preparation
 
