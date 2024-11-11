@@ -12,6 +12,14 @@
 
 ## 👩‍💻 Workshop Preparation
 
+### Checkout and Update the Workshop Branch
+
+```
+git checkout dataphos-workshops
+
+git pull
+```
+
 ### Install Dependencies
 
 Create a virtual environment from the `pulumi/` directory and activate it:
