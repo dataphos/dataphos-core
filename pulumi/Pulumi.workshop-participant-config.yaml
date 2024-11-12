@@ -47,7 +47,7 @@ config:
         broker: servicebus
         destinationBroker: servicebus
         topic: <participant_identification>-input-topic
-        consumerID: <participant_identification>-val-sub
+        consumerID: validator-sub
         validTopic: <participant_identification>-valid-topic
         deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
@@ -109,7 +109,6 @@ config:
           subscriptions:
             <participant_identification>-val-sub: {}
         <participant_identification>-input-topic:
-          retain: true
           subscriptions:
             <participant_identification>-val-sub: {}
         <participant_identification>-valid-topic:

@@ -30,3 +30,11 @@
    ```
    pulumi up
    ```
+
+### 4. Task: Clean Up
+
+1. You are at the end of the workshop. Please clean up your resources by running:
+
+   ```
+   pulumi destroy
+   ```
