@@ -2,5 +2,5 @@ name: dataphos
 runtime:
   name: python
   options:
-    virtualenv: venv
+    virtualenv: .venv
 description: Dataphos Helm charts and supporting infrastructure

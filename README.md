@@ -22,12 +22,17 @@ git pull
 
 ### Install Dependencies
 
-Create a virtual environment from the `pulumi/` directory and activate it:
+Create a virtual environment from the `pulumi/` directory:
 
 ```
 cd pulumi
 
-py -m venv venv
+py -m venv .venv
+```
+
+Activate the virtual environment:
+
+```
 .\venv\Scripts\activate
 ```
 
