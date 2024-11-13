@@ -12,7 +12,7 @@ git pull
 
 ### Install Python
 
-Please make sure you have Python installed.
+Please make sure you have Python installed ([Windows](https://www.python.org/downloads/windows/), [Linux/UNIX](https://www.python.org/downloads/source/), [macOS](https://www.python.org/downloads/macos/))
 
 **⚠️WARNING⚠️**: install Python version 3.11 or lower, newer Python versions caused problems while using pip.
 
