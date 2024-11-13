@@ -52,10 +52,18 @@ Mac/Linux:
 source .venv/bin/activate
 ```
 
-Install package dependencies:
+Install package dependencies.
+
+Windows:
 
 ```
 py -m pip install -r .\requirements.txt
+```
+
+Linux:
+
+```
+python3 -m pip install -r ./requirements.txt
 ```
 
 This installation will last anywhere from 10 to 30 minutes. Please proceed to next steps while it installs.
