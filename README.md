@@ -22,8 +22,12 @@ Create a virtual environment from the `pulumi/` directory:
 
 ```
 cd pulumi
+```
 
-py -m venv .venv
+Create the virtual environment using the `-3.XX` flag which explicitly selects the python version to use. For example, if you installed python version `3.10`, run the following command:
+
+```
+py -3.10 -m venv .venv
 ```
 
 Activate the virtual environment.
