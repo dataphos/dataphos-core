@@ -54,11 +54,13 @@ This installation will last anywhere from 10 to 30 minutes. Please proceed to ne
 
 ### Configure Cloud Credentials
 
-Authorize access to the cloud where you will deploy the infrastructure using the CLI. Log in to the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and Pulumi will automatically use your credentials:
+Authorize access to the cloud where you will deploy the infrastructure using the CLI. Log in to the AzureCLI and Pulumi will automatically use your credentials:
 
 ```
 az login
 ```
+
+If you got an error because you don't have `az` installed, please follow the instructions on [this](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) link to install it. After the installation, please restart the terminal and try the command above again.
 
 You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription. If you don't have access, please create a post in the [Security and Infrastructure](https://teams.microsoft.com/l/channel/19%3A5c191b040ad54297a9e6caa16f918810%40thread.skype/Security%20and%20Infrastructure?groupId=60ba0e91-26c9-47ae-81e9-974956868bbf&tenantId=e27500de-8438-45fb-8228-8bf0cc45248b) channel.
 
