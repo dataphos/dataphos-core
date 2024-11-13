@@ -72,7 +72,7 @@ az account set --subscription a8330230-b8a0-4839-8650-17faf7ddcc42
 
 ### Install Pulumi
 
-You can follow the official tutorial [here](https://www.pulumi.com/docs/install/) or:
+Please open **an elevated command shell** and follow the official tutorial [here](https://www.pulumi.com/docs/install/) or:
 
 - on Windows, run: `choco install pulumi`
 - on Mac, run: `brew install pulumi/tap/pulumi`
@@ -80,11 +80,13 @@ You can follow the official tutorial [here](https://www.pulumi.com/docs/install/
 
 ### Log into Pulumi
 
-You need to log in to Pulumi in the CLI. If you don't have an account, please create one by connecting with your GitHub.
+You need to log in to Pulumi in the CLI.
 
 ```
 pulumi login
 ```
+
+Hit `ENTER` to log in using your browser. If you don't have an account, please create one by connecting with your GitHub.
 
 Your workshop preparation ends here!
 
