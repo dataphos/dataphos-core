@@ -1,16 +1,6 @@
-## ✅ Prerequisites
-
-1. [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-1. [Python](https://www.python.org/downloads/)
-   - ⚠️WARNING: install Python version 3.11 or lower, newer Python versions caused problems while using pip
-1. Pulumi - you can follow the official tutorial [here](https://www.pulumi.com/docs/install/) or:
-   - on Windows, run: `choco install pulumi`
-   - on Mac, run: `brew install pulumi/tap/pulumi`
-   - on Linux, run: `curl -fsSL https://get.pulumi.com | sh`
-1. You need to log in to Pulumi in the CLI using the `pulumi login` command (create an account if you don't have one)
-1. You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription. If you don't have access, please create a post in the [Security and Infrastructure](https://teams.microsoft.com/l/channel/19%3A5c191b040ad54297a9e6caa16f918810%40thread.skype/Security%20and%20Infrastructure?groupId=60ba0e91-26c9-47ae-81e9-974956868bbf&tenantId=e27500de-8438-45fb-8228-8bf0cc45248b) channel
-
 ## 👩‍💻 Workshop Preparation
+
+If you plan to follow along on the workshop, please **COMPLETE ALL TASKS** before attending!
 
 ### Checkout and Update the Workshop Branch
 
@@ -19,6 +9,12 @@ git checkout dataphos-workshops
 
 git pull
 ```
+
+### Install Python
+
+Please make sure you have Python installed.
+
+**⚠️WARNING⚠️**: install Python version 3.11 or lower, newer Python versions caused problems while using pip.
 
 ### Install Dependencies
 
@@ -30,10 +26,18 @@ cd pulumi
 py -m venv .venv
 ```
 
-Activate the virtual environment:
+Activate the virtual environment.
+
+Windows:
 
 ```
-.\venv\Scripts\activate
+.\.venv\Scripts\activate
+```
+
+Mac/Linux:
+
+```
+source .venv/bin/activate
 ```
 
 Install package dependencies:
@@ -42,16 +46,7 @@ Install package dependencies:
 py -m pip install -r .\requirements.txt
 ```
 
-Installation shouldn't take long, but please be patient as it can take up to 45 minutes, depending on your setup.
-
-**Note:**
-Windows has a file path length limit (260 characters), which may cause issues with long file paths during installation (particularly the "pulumi_azure_native\m365securityandcompliance\v20210325preview\get_private_link_services_for_o365_management_activity_api.py" file).
-
-To overcome this, enable long path support by editing the Windows registry:
-
-1. Open `regedit` (Registry Editor).
-2. Navigate to `Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Edit the `LongPathsEnabled` DWORD Value and set it to `1`.
+This installation will last anywhere from 10 to 30 minutes. Please proceed to next steps while it installs.
 
 ### Configure Cloud Credentials
 
@@ -61,8 +56,37 @@ Authorize access to the cloud where you will deploy the infrastructure using the
 az login
 ```
 
-Please select the correct Azure Subscription for the Workshop with the following command:
+You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription. If you don't have access, please create a post in the [Security and Infrastructure](https://teams.microsoft.com/l/channel/19%3A5c191b040ad54297a9e6caa16f918810%40thread.skype/Security%20and%20Infrastructure?groupId=60ba0e91-26c9-47ae-81e9-974956868bbf&tenantId=e27500de-8438-45fb-8228-8bf0cc45248b) channel.
+
+Select the the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription as the active one with the following command:
 
 ```
 az account set --subscription a8330230-b8a0-4839-8650-17faf7ddcc42
 ```
+
+### Install Pulumi
+
+You can follow the official tutorial [here](https://www.pulumi.com/docs/install/) or:
+
+- on Windows, run: `choco install pulumi`
+- on Mac, run: `brew install pulumi/tap/pulumi`
+- on Linux, run: `curl -fsSL https://get.pulumi.com | sh`
+
+### Log into Pulumi
+
+You need to log in to Pulumi in the CLI. If you don't have an account, please create one by connecting with your GitHub.
+
+```
+pulumi login
+```
+
+Your workshop preparation ends here!
+
+**Additional Note:**
+Windows has a file path length limit (260 characters), which may cause issues with long file paths during installation (particularly the "pulumi_azure_native\m365securityandcompliance\v20210325preview\get_private_link_services_for_o365_management_activity_api.py" file).
+
+To overcome this, enable long path support by editing the Windows registry:
+
+1. Open `regedit` (Registry Editor).
+2. Navigate to `Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Edit the `LongPathsEnabled` DWORD Value and set it to `1`.

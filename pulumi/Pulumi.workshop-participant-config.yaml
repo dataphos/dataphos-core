@@ -2,7 +2,7 @@ config:
 
   #################################### PRODUCT CONFIG #####################################
 
-  namespace: hosts-dataphos
+  namespace: <participant_identification>-dataphos
   # component selection
   deploySchemaRegistry: true
   deploySchemaRegistryValidator: true
@@ -37,19 +37,19 @@ config:
         broker: servicebus
         destinationBroker: servicebus
         topic: input-topic
-        consumerID: hosts-val-sub
-        validTopic: hosts-valid-topic
-        deadletterTopic: hosts-deadletter-topic
+        consumerID: <participant_identification>-val-sub
+        validTopic: <participant_identification>-valid-topic
+        deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
 
     # personalized validator
-      hosts-validator:
+      <participant_identification>-validator:
         broker: servicebus
         destinationBroker: servicebus
-        topic: hosts-input-topic
+        topic: <participant_identification>-input-topic
         consumerID: validator-sub
-        validTopic: hosts-valid-topic
-        deadletterTopic: hosts-deadletter-topic
+        validTopic: <participant_identification>-valid-topic
+        deadletterTopic: <participant_identification>-deadletter-topic
         replicas: 1
 
   # persistor chart config
@@ -57,19 +57,19 @@ config:
     persistor:
       persistor:
         broker: servicebus
-        topic: hosts-valid-topic
+        topic: <participant_identification>-valid-topic
         consumerID: persistor-sub
         storage: azure-blob-storage
-        storageTargetID: hosts-data-lake
+        storageTargetID: <participant_identification>-data-lake
         indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
         replicas: 1
-        storageCustomValues: "customValue1:hosts"
+        storageCustomValues: "customValue1:<participant_identification>"
         storageMask: "customValue1/{schemaId}/{versionId}/year/month/day/hour"
 
     indexer:
       indexer:
         broker: servicebus
-        topic: hosts-indexer-topic
+        topic: <participant_identification>-indexer-topic
         consumerID: indexer-sub
         replicas: 1 # Scale the service exposing the metadata
         consumerReplicas: 1 # Scale the consumers reading and storing the metadata
@@ -107,20 +107,20 @@ config:
         input-topic:
           retain: true
           subscriptions:
-            hosts-val-sub: {}
-        hosts-input-topic:
+            <participant_identification>-val-sub: {}
+        <participant_identification>-input-topic:
           subscriptions:
             validator-sub: {}
-        hosts-valid-topic:
+        <participant_identification>-valid-topic:
           subscriptions:
             persistor-sub: {}
-        hosts-deadletter-topic:
+        <participant_identification>-deadletter-topic:
           subscriptions:
             deadletter-topic-sub: {}
-        hosts-indexer-topic:
+        <participant_identification>-indexer-topic:
           subscriptions:
             indexer-sub: {}
-        hosts-resubmitter-topic:
+        <participant_identification>-resubmitter-topic:
           subscriptions:
             resubmitter-sub: {}
 
@@ -133,4 +133,4 @@ config:
       retain: true
 
       buckets:
-        hosts-data-lake: {}
+        <participant_identification>-data-lake: {}
