@@ -2,6 +2,8 @@
 
 If you plan to follow along on the workshop, please **COMPLETE ALL TASKS** before attending!
 
+**Additional note:** We prefer if you had [Visual Studio Code](https://code.visualstudio.com/) so you can run the Jupyter notebook we prepared for the workshop. If you don't like VSC, or something goes wrong with the setup, we have the alternative to run everything in the terminal and in [Postman](https://www.postman.com/). Make sure to at least have these two requirements.
+
 ### Checkout and Update the Workshop Branch
 
 ```
@@ -76,7 +78,7 @@ Authorize access to the cloud where you will deploy the infrastructure using the
 az login
 ```
 
-If you got an error because you don't have `az` installed, please follow the instructions on [this](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) link to install it. After the installation, please restart the terminal and try the command above again.
+If this ran successfully, it would be a good idea to also update your `az`. If you got an error because you don't have `az` installed, please follow the instructions on [this](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) link to install it. After the installation, please restart the terminal and try the command above again.
 
 You need to have access to the [Syntio - Microsoft Azure (Enterprise)](https://portal.azure.com/#@syntio.net/resource/subscriptions/a8330230-b8a0-4839-8650-17faf7ddcc42/overview) subscription. If you don't have access, please create a post in the [Security and Infrastructure](https://teams.microsoft.com/l/channel/19%3A5c191b040ad54297a9e6caa16f918810%40thread.skype/Security%20and%20Infrastructure?groupId=60ba0e91-26c9-47ae-81e9-974956868bbf&tenantId=e27500de-8438-45fb-8228-8bf0cc45248b) channel.
 
@@ -106,7 +108,7 @@ Hit `ENTER` to log in using your browser. If you don't have an account, please c
 
 Your workshop preparation ends here!
 
-**Additional Note:**
+**Additional note:**
 Windows has a file path length limit (260 characters), which may cause issues with long file paths during installation (particularly the "pulumi_azure_native\m365securityandcompliance\v20210325preview\get_private_link_services_for_o365_management_activity_api.py" file).
 
 To overcome this, enable long path support by editing the Windows registry:
