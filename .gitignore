@@ -167,5 +167,3 @@ cython_debug/
 
 # Stack configurations for development and testing
 /Pulumi.*.yaml
-
-Pulumi.workshop-participant-config-solution.yaml
