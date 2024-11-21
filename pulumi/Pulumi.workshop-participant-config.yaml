@@ -3,83 +3,78 @@ config:
   #################################### PRODUCT CONFIG #####################################
 
   namespace: <participant_identification>-dataphos
-  # component selection
-  deploySchemaRegistry: true
-  deploySchemaRegistryValidator: true
-  deployPersistor: true
 
   retainResourceGroups: true
 
   resourceTags:
     team: dataphos
     env: test
-
+  
   # schema registry chart config
-  dataphos-schema-registry:
-    registryReplicas: 1
+  deploySchemaRegistry: false
 
-    # History database.
-    database:
-      name: postgres
-      username: postgres
-      password: POSTGRES_PASSWORD
+  dataphos-schema-registry:
+    registryReplicas:
 
   # schema registry validator chart config
+  deploySchemaRegistryValidator: false
+
   dataphos-schema-registry-validator:
     xmlValidator:
-      enable: false
+      enable:
 
     csvValidator:
-      enable: false
+      enable:
 
     validator:
       validator:
-        broker: servicebus
-        destinationBroker: servicebus
-        topic: input-topic
-        consumerID: <participant_identification>-val-sub
-        validTopic: <participant_identification>-valid-topic
-        deadletterTopic: <participant_identification>-deadletter-topic
-        replicas: 1
+        broker:
+        destinationBroker:
+        topic:
+        consumerID:
+        validTopic:
+        deadletterTopic:
+        replicas:
 
     # personalized validator
       <participant_identification>-validator:
-        broker: servicebus
-        destinationBroker: servicebus
-        topic: <participant_identification>-input-topic
-        consumerID: validator-sub
-        validTopic: <participant_identification>-valid-topic
-        deadletterTopic: <participant_identification>-deadletter-topic
-        replicas: 1
+        broker:
+        destinationBroker:
+        topic:
+        consumerID:
+        validTopic:
+        deadletterTopic:
+        replicas: 
 
   # persistor chart config
+  deployPersistor: false
+
   dataphos-persistor:
     persistor:
       persistor:
-        broker: servicebus
-        topic: <participant_identification>-valid-topic
-        consumerID: persistor-sub
-        storage: azure-blob-storage
-        storageTargetID: <participant_identification>-data-lake
-        indexer: indexer # Indexer reference (if not set the indexer plugin is disabled)
-        replicas: 1
-        storageCustomValues: "customValue1:<participant_identification>"
-        storageMask: "customValue1/{schemaId}/{versionId}/year/month/day/hour"
+        broker:
+        topic:
+        consumerID:
+        storage:
+        storageTargetID:
+        indexer:
+        replicas:
+        storageMask:
 
     indexer:
       indexer:
-        broker: servicebus
-        topic: <participant_identification>-indexer-topic
-        consumerID: indexer-sub
-        replicas: 1 # Scale the service exposing the metadata
-        consumerReplicas: 1 # Scale the consumers reading and storing the metadata
-        storageSize: 1Gi
+        broker:
+        topic:
+        consumerID:
+        replicas:
+        consumerReplicas:
+        storageSize:
 
     resubmitter:
       resubmitter:
-        broker: servicebus
-        storage: azure-blob-storage
-        indexer: indexer
+        broker:
+        storage: 
+        indexer:
 
   ################################# INFRASTRUCTURE CONFIG #################################
 
