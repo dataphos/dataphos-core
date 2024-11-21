@@ -16,6 +16,12 @@ config:
   dataphos-schema-registry:
     registryReplicas:
 
+    # History database.
+    database:
+      name: postgres
+      username: postgres
+      password: POSTGRES_PASSWORD
+
   # schema registry validator chart config
   deploySchemaRegistryValidator: false
 
