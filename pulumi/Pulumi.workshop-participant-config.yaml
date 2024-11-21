@@ -38,13 +38,13 @@ config:
 
     # personalized validator
       <participant_identification>-validator:
-        broker:
-        destinationBroker:
-        topic:
-        consumerID:
-        validTopic:
-        deadletterTopic:
-        replicas: 
+        broker: servicebus
+        destinationBroker: servicebus
+        topic: <participant_identification>-input-topic
+        consumerID: validator-sub
+        validTopic: <participant_identification>-valid-topic
+        deadletterTopic: <participant_identification>-deadletter-topic
+        replicas: 1
 
   # persistor chart config
   deployPersistor: false
